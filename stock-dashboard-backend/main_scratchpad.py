@@ -118,7 +118,7 @@ def build_graph():
    builder.add_edge(START, "assistant")
    builder.add_conditional_edges("assistant", tools_condition)
    builder.add_edge("tools", "assistant")
-   
+
    return builder
 
 # Main Execution
@@ -143,17 +143,35 @@ if __name__ == "__main__":
            break
        
        initial_input = {'messages': [('user', user_input)]}
-       result = graph.invoke(initial_input, config)
-       parser = OutputParser()
-       readable_output = parser.parse(result)
-       print("\nProcessed Output:")
-       print(readable_output)
+    #    result = graph.invoke(initial_input, config)
+    #    parser = OutputParser()
+    #    readable_output = parser.parse(result)
+    #    print("\nProcessed Output:")
+    #    print(readable_output)
 
+    #    for event in graph.stream(initial_input):
+    #     for value in event.values():
+    #         print("Assistant:", value['messages'].content)
+    #         print("Assistant:", value['messages'])
+    # 
        for event in graph.stream(initial_input):
-        print(event.values())
-        for value in event.values():
-            print("Assistant:", value['messages'].content)
-           
+            for value in event.values():
+                if isinstance(value['messages'], list):
+                    # Handle list of messages
+                    for message in value['messages']:
+                        if hasattr(message, 'content') and message.content:
+                            print("Assistant1:", message.content)
+                        elif hasattr(message, 'name'):  # This is a tool message
+                            print("Assistant2:", message.content)
+                else:
+                    # Handle single message
+                    message = value['messages']
+                    if hasattr(message, 'content') and message.content:
+                        print("Assistant3:", message.content)
+                    elif hasattr(message, 'additional_kwargs') and 'tool_calls' in message.additional_kwargs:
+                        # Just print that we're processing the tool call
+                        print("Processing tool request...")
+            
 #    # Example interaction
 #    initial_input = {"messages": [("user", "Search for market news for apple")]}
 #    result = graph.invoke(initial_input, config)
