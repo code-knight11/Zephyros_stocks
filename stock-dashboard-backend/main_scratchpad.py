@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import Annotated, TypedDict
 import requests
 import os
+import asyncio
+import uuid
 from custom_output_parser import OutputParser
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -22,6 +24,7 @@ llm = ChatOpenAI(
    model="gpt-3.5-turbo",
    openai_api_key=OPENAI_API_KEY,
 )
+
 
 # Define State
 class State(TypedDict):
@@ -121,9 +124,27 @@ def build_graph():
 
    return builder
 
-# Main Execution
-if __name__ == "__main__":
-   import uuid
+async def process_graph(initial_input,graph):
+    async for event in graph.astream(initial_input):  # Use astream for async streaming
+        for value in event.values():
+            if isinstance(value['messages'], list):
+                # Handle list of messages
+                for message in value['messages']:
+                    if hasattr(message, 'content') and message.content:
+                        print("Assistant1:", message.content)
+                    elif hasattr(message, 'name'):  # This is a tool message
+                        print("Assistant2:", message.content)
+            else:
+                # Handle single message
+                message = value['messages']
+                if hasattr(message, 'content') and message.content:
+                    print("Assistant3:", message.content)
+                elif hasattr(message, 'additional_kwargs') and 'tool_calls' in message.additional_kwargs:
+                    # Just print that we're processing the tool call
+                    print("Processing tool request...")
+
+async def main():
+    
    
    builder = build_graph()
    graph = builder.compile()
@@ -143,6 +164,35 @@ if __name__ == "__main__":
            break
        
        initial_input = {'messages': [('user', user_input)]}
+       await process_graph(initial_input,graph)
+
+
+
+# Main Execution
+if __name__ == "__main__":
+
+    asyncio.run(main())
+#    import uuid
+   
+#    builder = build_graph()
+#    graph = builder.compile()
+   
+#    thread_id = str(uuid.uuid4())
+#    config = {
+#        "configurable": {
+#            "user_id": "stock_assistant",
+#            "thread_id": thread_id,
+#        }
+#    }
+
+#    while True:
+#        user_input= input("User: ")
+#        if user_input.lower() in ["quit","q"]:
+#            print("Goodbye")
+#            break
+       
+#        initial_input = {'messages': [('user', user_input)]}
+
     #    result = graph.invoke(initial_input, config)
     #    parser = OutputParser()
     #    readable_output = parser.parse(result)
@@ -154,23 +204,23 @@ if __name__ == "__main__":
     #         print("Assistant:", value['messages'].content)
     #         print("Assistant:", value['messages'])
     # 
-       for event in graph.stream(initial_input):
-            for value in event.values():
-                if isinstance(value['messages'], list):
-                    # Handle list of messages
-                    for message in value['messages']:
-                        if hasattr(message, 'content') and message.content:
-                            print("Assistant1:", message.content)
-                        elif hasattr(message, 'name'):  # This is a tool message
-                            print("Assistant2:", message.content)
-                else:
-                    # Handle single message
-                    message = value['messages']
-                    if hasattr(message, 'content') and message.content:
-                        print("Assistant3:", message.content)
-                    elif hasattr(message, 'additional_kwargs') and 'tool_calls' in message.additional_kwargs:
-                        # Just print that we're processing the tool call
-                        print("Processing tool request...")
+    #    for event in graph.stream(initial_input):
+    #         for value in event.values():
+    #             if isinstance(value['messages'], list):
+    #                 # Handle list of messages
+    #                 for message in value['messages']:
+    #                     if hasattr(message, 'content') and message.content:
+    #                         print("Assistant1:", message.content)
+    #                     elif hasattr(message, 'name'):  # This is a tool message
+    #                         print("Assistant2:", message.content)
+    #             else:
+    #                 # Handle single message
+    #                 message = value['messages']
+    #                 if hasattr(message, 'content') and message.content:
+    #                     print("Assistant3:", message.content)
+    #                 elif hasattr(message, 'additional_kwargs') and 'tool_calls' in message.additional_kwargs:
+    #                     # Just print that we're processing the tool call
+    #                     print("Processing tool request...")
             
 #    # Example interaction
 #    initial_input = {"messages": [("user", "Search for market news for apple")]}
