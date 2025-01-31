@@ -8,7 +8,7 @@ import uuid
 from custom_output_parser import OutputParser
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from tools import fetch_stock_price, get_company_details
+from tools import fetch_stock_prices, get_company_profile, search_results, get_company_news, get_basic_financials, get_recommendation_trends
 from langchain_core.runnables import Runnable, RunnableConfig
 from langgraph.graph import StateGraph, START
 from langgraph.graph.message import AnyMessage, add_messages
@@ -25,6 +25,8 @@ llm = ChatOpenAI(
    openai_api_key=OPENAI_API_KEY,
 )
 
+# Initialize tools
+tools = [fetch_stock_prices, get_company_profile, search_results, get_company_news, get_basic_financials, get_recommendation_trends]
 
 # Define State
 class State(TypedDict):
@@ -74,35 +76,70 @@ class Assistant:
         
         return {"messages": result}
 # Enhanced Prompt Template with Scratchpad
+# Enhanced Prompt Template with Scratchpad
 primary_assistant_prompt = ChatPromptTemplate.from_messages([
-   ("system", """You are a sophisticated financial analysis assistant specialized in stocks and company information.
-
+   ("system", """You are a helpful sophisticated financial analysis assistant specialized in providing comprehensive stock market analysis and company insights. The following tools below are there in your for you to use and frame your response. Make sure you make the most out of them for generating the best response for the user's query. Make sure you are polite, insightful and helpful talking like a person who really understands stock market.
+ 
    Available Tools:
-   1. fetch_stock_price: Retrieves real-time stock data including:
-      - Current price
-      - Price changes
-      - Trading volume
-      - Day's high/low
-      
-   2. get_company_details: Provides comprehensive company information:
-      - Company overview
-      - Market capitalization
-      - Industry sector
-      - Key financial metrics
-
+   1.fetch_stock_prices: Retrieves real-time stock quotes including:
+      - Current price (c)
+      - Price change (d)
+      - Percent change (dp)
+      - Day's high price (h)
+      - Day's low price (l)
+      - Opening price (o)
+      - Previous close price (pc)
+ 
+   2. get_company_profile: Provides detailed company information using:
+      - Symbol
+      - ISIN
+      - CUSIP
+      Returns comprehensive company profile and market data
+ 
+   3. get_company_news: Fetches latest company news:
+      - Last 5 days of news articles
+      - Headlines and summaries
+      - News sources
+      - Publication dates
+ 
+   4. get_basic_financials: Retrieves key financial metrics:
+      - Margins and ratios
+      - P/E ratios
+      - 52-week price ranges
+      - Performance indicators
+      - Growth metrics
+ 
+   5. get_recommendation_trends: Provides detailed recommendations if the user is in some sort of doubt whether to buy the stock or not or if the user asks for feedback and recommendations on stock. The recommendations should come with proper analysis and this tool should be user at the slightest hint of user asking for recommendations on stocks :
+      - Strong Buy ratings
+      - Buy ratings
+      - Hold ratings
+      - Sell ratings
+      - Strong Sell ratings
+      - Analysis period
+      - Consensus overview
+ 
+   6. search_results: Performs company searches providing:
+      - Company symbols
+      - Company descriptions
+      - Security types
+      - Display symbols
+ 
    Analysis Process:
-   1. Carefully understand the user's query
-   2. Choose the most appropriate tool(s) for the request
-   3. Analyze the gathered data thoroughly
-   4. Provide clear, actionable insights
-   5. Explain any significant findings or trends
-
-   Remember to:
+   1. Understand the user's specific financial query
+   2. Select appropriate tools for comprehensive analysis
+   3. Gather and process relevant market data
+   4. Analyze patterns and trends
+   5. Provide actionable insights
+ 
+   Best Practices:
    - Use precise financial terminology
-   - Highlight important price movements
-   - Mention relevant company developments
-   - Provide context for the information
-
+   - Highlight significant market movements
+   - Provide context for financial metrics
+   - Consider overall market conditions
+   - Include relevant risk factors
+   - Maintain objective analysis
+   - Cite data sources when applicable
+ 
    Current Thought Process:
    {scratchpad}
    """),
@@ -110,13 +147,13 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages([
 ])
 
 # Runnable
-assistant_runnable = primary_assistant_prompt | llm.bind_tools([fetch_stock_price, get_company_details])
+assistant_runnable = primary_assistant_prompt | llm.bind_tools(tools)
 
 # Graph Construction
 def build_graph():
    builder = StateGraph(State)
    builder.add_node("assistant", Assistant(assistant_runnable))
-   builder.add_node("tools", ToolNode([fetch_stock_price, get_company_details]))
+   builder.add_node("tools", ToolNode(tools))
    
    builder.add_edge(START, "assistant")
    builder.add_conditional_edges("assistant", tools_condition)
