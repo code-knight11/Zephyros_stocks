@@ -21,6 +21,7 @@ FINNHUB_API_KEY = os.getenv("finnhub_api_key")
 
 # Initialize LLM
 llm = ChatOpenAI(
+    temperature=0,
    model="gpt-3.5-turbo",
    openai_api_key=OPENAI_API_KEY,
 )
@@ -209,60 +210,3 @@ async def main():
 if __name__ == "__main__":
 
     asyncio.run(main())
-#    import uuid
-   
-#    builder = build_graph()
-#    graph = builder.compile()
-   
-#    thread_id = str(uuid.uuid4())
-#    config = {
-#        "configurable": {
-#            "user_id": "stock_assistant",
-#            "thread_id": thread_id,
-#        }
-#    }
-
-#    while True:
-#        user_input= input("User: ")
-#        if user_input.lower() in ["quit","q"]:
-#            print("Goodbye")
-#            break
-       
-#        initial_input = {'messages': [('user', user_input)]}
-
-    #    result = graph.invoke(initial_input, config)
-    #    parser = OutputParser()
-    #    readable_output = parser.parse(result)
-    #    print("\nProcessed Output:")
-    #    print(readable_output)
-
-    #    for event in graph.stream(initial_input):
-    #     for value in event.values():
-    #         print("Assistant:", value['messages'].content)
-    #         print("Assistant:", value['messages'])
-    # 
-    #    for event in graph.stream(initial_input):
-    #         for value in event.values():
-    #             if isinstance(value['messages'], list):
-    #                 # Handle list of messages
-    #                 for message in value['messages']:
-    #                     if hasattr(message, 'content') and message.content:
-    #                         print("Assistant1:", message.content)
-    #                     elif hasattr(message, 'name'):  # This is a tool message
-    #                         print("Assistant2:", message.content)
-    #             else:
-    #                 # Handle single message
-    #                 message = value['messages']
-    #                 if hasattr(message, 'content') and message.content:
-    #                     print("Assistant3:", message.content)
-    #                 elif hasattr(message, 'additional_kwargs') and 'tool_calls' in message.additional_kwargs:
-    #                     # Just print that we're processing the tool call
-    #                     print("Processing tool request...")
-            
-#    # Example interaction
-#    initial_input = {"messages": [("user", "Search for market news for apple")]}
-#    result = graph.invoke(initial_input, config)
-#    parser = OutputParser()
-#    readable_output = parser.parse(result)
-#    print("\nProcessed Output:")
-#    print(readable_output)

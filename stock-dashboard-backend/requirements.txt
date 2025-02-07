@@ -3,3 +3,6 @@ langgraph
 langchain_openai
 python-dotenv
 aiohttp
+flask
+flask[async]
+flask-cors

@@ -1,0 +1,11 @@
+langchain_core
+langgraph
+langchain_openai
+python-dotenv
+aiohttp
+flask
+flask[async]
+flask-cors
+langchain_community
+mysql-connector-python
+pinecone
