@@ -2,9 +2,9 @@ import asyncio
 import uuid
 from langchain_openai import ChatOpenAI
 from settings import OPENAI_API_KEY
-from stock_assistant.tools.stock_tools import fetch_stock_prices, get_company_profile, search_results, get_company_news, get_basic_financials, get_recommendation_trends
+from stock_tools import fetch_stock_prices, get_company_profile, search_results, get_company_news, get_basic_financials, get_recommendation_trends
 # from tools.db_tools import run_database_query
-from stock_assistant.prompts.stock_prompts import stock_assistant_prompt
+from stock_prompts import stock_assistant_prompt
 # from stock_assistant.prompts.db_prompts import db_assistant_prompt
 from rag_prompt import rag_assistant_prompt
 from graph_builder import build_graph

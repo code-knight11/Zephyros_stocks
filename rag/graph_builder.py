@@ -2,11 +2,11 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import AnyMessage
 from langgraph.prebuilt import ToolNode
 import json
-from stock_assistant.models.state import State 
-from stock_assistant.assistants.db_assistant import DBAssistant
-from stock_assistant.assistants.stock_assistant import StockAssistant
+from state import State 
+# from stock_assistant.assistants.db_assistant import DBAssistant
+from stock_assistant import StockAssistant
 from rag_assistant import rag_assistant
-from stock_assistant.assistants.router import Router 
+from router import Router 
 from langchain_core.messages import SystemMessage
 
 def route_condition(state):
@@ -65,6 +65,7 @@ def build_graph(llm, stock_tools ,stock_assistant_runnable,rag_assistant_runnabl
         route_condition,
         {
             "stock": "stock_assistant",
+            "rag":"rag_assistant"
             
         }
     )
@@ -87,7 +88,7 @@ def build_graph(llm, stock_tools ,stock_assistant_runnable,rag_assistant_runnabl
             None:END
         })
     
-    builder.add_edge("rag_tools","rag_assistant")
+    builder.add_edge("rag_tools",END)
     
     # builder.add_conditional_edges(
     #     "db_assistant",

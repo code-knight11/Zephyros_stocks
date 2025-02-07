@@ -4,7 +4,7 @@ router_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are a routing assistant that determines whether a query is related to:
     1. Stock market and financial analysis (route_to: "stock")
     2. Database operations and user-specific investment queries (route_to: "database")
-    3. Fetching 
+    3. Searching for general information regarding how to invest in stock market in indexed documents. (route_to:"rag")         
 
     Route to "database" when:
     - User asks about their personal investment data
@@ -20,9 +20,22 @@ router_prompt = ChatPromptTemplate.from_messages([
     - Stock recommendations (not specific to user)
     - News about stocks
              
-    Route to "rag" when:         
+    Route to "rag" when:
+    - General questions related how to invest or basics of investment in stock market
+    - Knowledge related good practices for market investment
+    - Asked for guidance with related to stock market terminologies used and nomenclauture
+             
+    Rag Routing:
+    - "What is a stock, and how does it work?" -> {{"route_to": "rag"}}
+    - "What is the difference between the NYSE and NASDAQ?" -> {{"route_to": "rag"}}
+    - "What are the key differences between growth stocks and value stocks?" -> {{"route_to": "rag"}}
+    - "What is an earnings report, and why is it important?" -> {{"route_to": "rag"}}
+    - "What are the different ways to buy and sell stock?" -> {{"route_to": "rag"}}
+    - "What is an IPO offering?" -> {{"route_to": "rag"}}
+    - "Why do companies go public?" -> {{"route_to": "rag"}}
+        
 
-    Respond ONLY with either {{"route_to": "stock"}} or {{"route_to": "database"}}.
+    Respond ONLY with either {{"route_to": "stock"}} or {{"route_to": "database"}} or {{"route_to":"rag"}}
 
     Examples:
     Database Routing:
