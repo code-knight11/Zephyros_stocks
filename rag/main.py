@@ -8,11 +8,11 @@ from stock_prompts import stock_assistant_prompt
 # from stock_assistant.prompts.db_prompts import db_assistant_prompt
 from rag_prompt import rag_assistant_prompt
 from graph_builder import build_graph
-from rag_tools import semantic_search
+# from rag_tools import semantic_search
 
 # db_tools = [run_database_query]
 stock_tools = [fetch_stock_prices, get_company_profile, search_results, get_company_news, get_basic_financials, get_recommendation_trends]
-rag_tools=[semantic_search]
+# rag_tools=[semantic_search]
 
 async def process_graph(initial_input, graph):
     async for event in graph.astream(initial_input):
@@ -40,8 +40,7 @@ async def main():
     
     stock_assistant_runnable = stock_assistant_prompt | llm.bind_tools(stock_tools)
     # db_assistant_runnable = db_assistant_prompt | llm.bind_tools(db_tools)
-    rag_assistant_runnable= rag_assistant_prompt | llm.bind_tools(rag_tools)
-    builder = build_graph(llm, stock_tools=stock_tools, stock_assistant_runnable=stock_assistant_runnable,rag_assistant_runnable=rag_assistant_runnable,rag_tools=rag_tools)
+    builder = build_graph(llm, stock_tools=stock_tools, stock_assistant_runnable=stock_assistant_runnable)
     graph = builder.compile()
    
     thread_id = str(uuid.uuid4())

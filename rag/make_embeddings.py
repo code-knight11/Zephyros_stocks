@@ -221,5 +221,5 @@ if __name__ == "__main__":
     # index_new_document("/path/to/your/document.pdf")
     
     # To query the system:
-    question = "What should be the investment objectives?"
+    question = "what are DON’Ts for investing in IPOs/FPOs"
     query_system(question)
