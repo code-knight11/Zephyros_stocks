@@ -1,5 +1,3 @@
-
-# assistants/router.py
 from dataclasses import dataclass
 from typing import Literal
 from langchain_core.prompts import ChatPromptTemplate
@@ -10,7 +8,7 @@ from prompts.router_prompt import router_prompt
 
 @dataclass
 class RouteMessage:
-    route_to: Literal["stock", "database"]
+    route_to: Literal["stock", "analyzer","rag"]
     original_message: str
 
 class Router:
@@ -24,7 +22,8 @@ class Router:
         formatted_messages = router_prompt.format_messages(input=message_content)
         result = self.runnable.invoke(formatted_messages)
         
-        route_to = "database" if "database" in result.content.lower() else "stock"
+        route_to = "analyzer" if "analyzer" in result.content.lower() else "rag" if "rag" in result.content.lower() else "stock"
+
         
         debug_info = {
             "thought": f"I analyzed the query and found keywords that indicate a preference for '{route_to}'.",
