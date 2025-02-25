@@ -8,7 +8,6 @@ import Chart from "./Chart";
 import Header from "./Header";
 import TopNav from "./TopNav";
 
-
 const API_BASE = "http://localhost:5002/api";
 
 const Dashboard = () => {
