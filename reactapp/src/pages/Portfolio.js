@@ -1,5 +1,3 @@
-
-
 import React, { useContext, useEffect, useState } from "react";
 import ThemeContext from "../context/ThemeContext";
 import TopNav from "../components/TopNav";
