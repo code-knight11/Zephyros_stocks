@@ -10,17 +10,18 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 
-FINNHUB_TOKEN =
-MARKET_DATA_API =
-os.environ['CURL_CA_BUNDLE'] = 
-ALPHA_VANTAGE_TOKEN = 
+FINNHUB_TOKEN = "cu8u0q9r01qgljarpsh0cu8u0q9r01qgljarpshg"
+MARKET_DATA_API ="YnkwUUZGZFZzblJBX1FlYXJNdTFydHE5bTFBSnM3QmNtYUNNWDdrb213WT0"
+os.environ['CURL_CA_BUNDLE'] = 'C:\\Users\\swajanghosh\\Downloads\\stock_assistant (2)\\stock_assistant\\cacert.pem'
+ALPHA_VANTAGE_TOKEN = "L08T6V3R182U15AJ"
+# ALPHA_VANTAGE_TOKEN = "demo"
 
 def get_userdata_connection():
     try:
         connection = mysql.connector.connect(
             host='localhost',
-            user='',
-            password='',
+            user='root',
+            # password='',
             database='zephyros_userdata'
         )
         print("Connection to database established successfully!")
@@ -33,8 +34,8 @@ def get_marketdata_connection():
     try:
         connection = mysql.connector.connect(
             host='localhost',
-            user='',
-            password='',
+            user='root',
+            # password='',
             database='zephyros_marketdata' 
         )
         print("Connection to zephyros_marketdata established successfully!")
@@ -412,8 +413,6 @@ def search():
             "error": "An unexpected error occurred",
             "message": str(e)
         }), 500
-        
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
