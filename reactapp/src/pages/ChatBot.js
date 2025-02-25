@@ -33,11 +33,18 @@ const Chatbot = () => {
       if (!response.ok) {
         throw new Error("Failed to fetch conversation");
       }
+
       const data = await response.json();
+      console.log("Heree1");
+      
+      console.log(data)
       const relevantMessages = data.messages.filter((msg) =>
         msg.role === "user" ||
         ((msg.role === "assistant2" || msg.role === "rag_assistant") && msg.content.trim() !== "")
       );
+      console.log(relevantMessages);
+      console.log("Heree2");
+
       const formattedMessages = relevantMessages.map((msg) => ({
         id: msg.id,
         sender: msg.role === "user" ? "user" : "bot",
@@ -55,12 +62,33 @@ const Chatbot = () => {
     e.preventDefault();
     if (!message.trim()) return;
   
+    // If there's no current thread ID, create a new conversation
+    let threadIdToUse = currentThreadId;
+    if (!threadIdToUse) {
+      try {
+        const newConvResponse = await fetch(`http://127.0.0.1:5000/api/new_conversation/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!newConvResponse.ok) {
+          throw new Error("Failed to start a new conversation");
+        }
+        const newConvData = await newConvResponse.json();
+        threadIdToUse = newConvData.thread_id;
+        setCurrentThreadId(threadIdToUse);
+      } catch (error) {
+        console.error("Error starting new conversation:", error);
+        addBotMessage("Error: Could not start a new conversation.");
+        return;
+      }
+    }
+  
+    // Add user's message to the chat
     const newUserMessage = { id: Date.now(), sender: "user", content: message };
     setChatMessages((prev) => [...prev, newUserMessage]);
-    
-    // Clear the input immediately
+  
+    // Clear the input
     setMessage("");
-    
     setIsLoading(true);
   
     try {
@@ -69,19 +97,27 @@ const Chatbot = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
-          thread_id: currentThreadId, // Include current thread ID if exists
+          thread_id: threadIdToUse,
         }),
       });
       if (!response.ok) {
         throw new Error("Failed to fetch chat response");
       }
       const data = await response.json();
+      console.log("123 ",data);
       
+  
       const assistantResponse = data.responses.find((response) =>
         (response.role === "assistant2" || response.role === "rag_assistant") &&
         response.content.trim() !== ""
       );
+
+      // const assistantResponse = data.responses
+      //   .filter((response) => response.role === "assistant2" && response.content.trim() !== "")
+      //   .pop();
+      console.log("response: ",assistantResponse);
       
+  
       if (assistantResponse) {
         addBotMessage(assistantResponse.content);
       }
@@ -91,7 +127,7 @@ const Chatbot = () => {
     }
     setIsLoading(false);
   };
-  
+    
   return (
     <div
       className={`h-screen flex ${
@@ -111,38 +147,42 @@ const Chatbot = () => {
           }`}
         >
           <div className="mx-auto space-y-4">
-            {chatMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex w-full ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-              >
+            {chatMessages.map((msg) => {
+              // console.log(msg.content);
+              // console.log(React.isValidElement(msg.content));
+              return (
                 <div
-                  className={`${
-                    React.isValidElement(msg.content)
-                      ? "min-w-[500px] max-w-[800px]"
-                      : "max-w-sm"
-                  } px-6 py-6 rounded-2xl ${
-                    msg.sender === "user"
-                      ? "bg-indigo-600 text-white rounded-br-none text-lg"
-                      : darkMode
-                      ? "bg-gray-800 text-gray-100 rounded-bl-none text-lg"
-                      : "bg-white text-gray-900 rounded-bl-none shadow-sm text-lg"
-                  }`}
+                  key={msg.id}
+                  className={`flex w-full ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {React.isValidElement(msg.content) ? (
-                    <div className="w-full">{msg.content}</div>
-                  ) : (
-                    <pre className="whitespace-pre-wrap text-sm">{msg.content}</pre>
-                  )}
+                  <div
+                    className={`${
+                      React.isValidElement(msg.content)
+                        ? "min-w-[500px]"
+                        : ""
+                    } p-3 rounded-2xl ${
+                      msg.sender === "user"
+                        ? "bg-indigo-600 text-white rounded-br-none text-lg"
+                        : darkMode
+                        ? "bg-gray-800 text-gray-100 rounded-bl-none text-lg"
+                        : "bg-white text-gray-900 rounded-bl-none shadow-sm text-lg"
+                    }`}
+                  >
+                    {React.isValidElement(msg.content) ? (
+                      <div className="w-full">{msg.content}</div>
+                    ) : (
+                      <pre className="whitespace-pre-wrap text-sm">{msg.content}</pre>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             <div ref={bottomRef} />
           </div>
         </div>
 
         {/* Bottom container with input and loader */}
-        <div className="p-8 relative">
+        <div className="p-4 relative border-t-2">
           {isLoading && (
             <div className="absolute bottom-24 mb-1 ml-2">
                <BouncingDotsLoader /> 
@@ -154,7 +194,7 @@ const Chatbot = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
-              className={`flex-1 px-4 py-5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+              className={`flex-1 px-2 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                 darkMode
                   ? "bg-gray-800 border-gray-700 text-gray-100"
                   : "bg-white border-gray-300 text-gray-900"
