@@ -9,3 +9,6 @@ flask-cors
 langchain_community
 mysql-connector-python
 pinecone
+pinecone-client[grpc]
+ragas
+tabulate
