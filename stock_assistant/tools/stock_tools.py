@@ -64,34 +64,42 @@ def get_company_news(symbol: str):
     """Fetch the company news for the specified symbol for the past 5 days"""
     # Calculate current date and 5 days prior
     to_date = datetime.now().strftime("%Y-%m-%d")
-    from_date = (datetime.now() - timedelta(days=5)).strftime("%Y-%m-%d")
-    
+    print(to_date)
+    from_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    print(from_date)
+    print("symbol: ",symbol)
     # Construct the URL
-    url = f"https://finnhub.io/api/v1/company-news?symbol={symbol}&from={from_date}&to={to_date}&token=cu8u0q9r01qgljarpsh0cu8u0q9r01qgljarpshg"
+    url = f"https://finnhub.io/api/v1/company-news?symbol={symbol}&from=2025-01-15&to=2025-02-20&token=cu89f81r01qhqu5cej5gcu89f81r01qhqu5cej60"
     
     try: 
         response = requests.get(url)
+        print("company news response: ",response)
         data = response.json()
+        print("json daata: ",data)
         return f"{symbol} company news: {data}"
     except Exception as e: 
         return f"Error fetching company news: {str(e)}"
 
 @tool
-def get_basic_financials(symbol:str, metric:str=None):
+def get_basic_financials(symbol:str):
     """Fetch a specific financial metric for a given stock symbol. If the user doesn't specify a metric, prompt them to select one."""
-    url = f"https://finnhub.io/api/v1/stock/metric?symbol={symbol}&metric=all&token=cu8u0q9r01qgljarpsh0cu8u0q9r01qgljarpshg"
+    url = f"https://finnhub.io/api/v1/stock/metric?symbol={symbol}&metric=52WeekHigh&token=cu8u0q9r01qgljarpsh0cu8u0q9r01qgljarpshg"
     try:
         response = requests.get(url)
         data = response.json()
-        metrics = data.get('metric', {})
-        if not metrics:
-            return "No financial metrics available for this stock"
-        if metric is None:
-            return f"Which metric are you looking for? Available options: {', '.join(metrics.keys())}"
-        if metric in metrics:
-            return f"The {metrics} for {symbol.upper()} is {metrics[metric]}."
-        else:
-            return f"Sorry, {metric} is not a recognized metric. Available metrics: {', '.join(metrics.keys())}"
+        financials=data["metric"]
+        # print("Financials",financials)
+        return f"{symbol} financials: {financials}"
+        # metrics = data.get('metric', {})
+        # print("metrics: ",metrics)
+        # if not metrics:
+        #     return "No financial metrics available for this stock"
+        # if metric is None:
+        #     return f"Which metric are you looking for? Available options: {', '.join(metrics.keys())}"
+        # if metric in metrics:
+        #     return f"The {metrics} for {symbol.upper()} is {metrics[metric]}."
+        # else:
+        #     return f"Sorry, {metric} is not a recognized metric. Available metrics: {', '.join(metrics.keys())}"
     except Exception as e:
         return f"Error fetching basic financials: {str(e)}"
     
@@ -137,9 +145,3 @@ def search_results(company:str):
             print(f"Failed to fetch data. Status code: {response.status_code}")
     except Exception as e:
         return f"Error fetching search results: {str(e)}"
-    
-        
-        
-
-
- 
